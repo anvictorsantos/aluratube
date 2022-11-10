@@ -26,6 +26,8 @@ function HomePage() {
 export default HomePage
 
 const StyleHeader = styled.div`
+    background-color: ${({ theme }) => theme.backgroundLevel1 };
+    
     img {
         width: 80px;
         height: 80px;
