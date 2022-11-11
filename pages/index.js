@@ -3,21 +3,38 @@ import config from "../config.json";
 import styled from "styled-components";
 import { CSSReset } from "../src/components/CSSReset";
 import Menu from "../src/components/Menu";
-import { StyledTimeline } from "../src/components/Timeline"
+import { StyledTimeline } from "../src/components/Timeline";
+import { videoService } from "../src/services/videoService";
 
 function HomePage() {
+    const service = videoService();
     const [valorDoFiltro, setValorDoFiltro] = React.useState("");
+    const [playlists, setPlaylists] = React.useState({});
+
+    React.useEffect(() => {
+        service
+            .getAllVideos()
+            .then((dados) => {
+                const novasPlaylists = { ...playlists };
+                dados.data.forEach((video) => {
+                    if (!novasPlaylists[video.playlist]) novasPlaylists[video.playlist] = [];
+                    novasPlaylists[video.playlist].push(video);
+                })
+                setPlaylists(novasPlaylists);
+            });
+    }, []);
+
     return (
         <>
             <CSSReset />
-            <div style={{ 
+            <div style={{
                 display: "flex",
                 flexDirection: "column",
                 flex: 1,
             }}>
                 <Menu valorDoFiltro={valorDoFiltro} setValorDoFiltro={setValorDoFiltro} />
                 <Header />
-                <Timeline searchValue={valorDoFiltro} playlists={config.playlists} />
+                <Timeline searchValue={valorDoFiltro} playlists={playlists} />
             </div>
         </>
     )
@@ -26,7 +43,7 @@ function HomePage() {
 export default HomePage
 
 const StyleHeader = styled.div`
-    background-color: ${({ theme }) => theme.backgroundLevel1 };
+    background-color: ${({ theme }) => theme.backgroundLevel1};
     
     img {
         width: 80px;
@@ -51,7 +68,7 @@ const StyledBanner = styled.div`
 function Header() {
     return (
         <StyleHeader>
-            <StyledBanner bg={config.bg}/>
+            <StyledBanner bg={config.bg} />
             <section className="user-info">
                 <img src={`https://github.com/${config.github}.png`}></img>
                 <div>
@@ -63,7 +80,7 @@ function Header() {
     )
 }
 
-function Timeline({searchValue, ...propriedades}) {
+function Timeline({ searchValue, ...propriedades }) {
     const playlistNames = Object.keys(propriedades.playlists);
 
     return (
